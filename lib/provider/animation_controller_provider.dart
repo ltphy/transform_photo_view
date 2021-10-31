@@ -25,7 +25,7 @@ class AnimationControllerProvider extends ChangeNotifier {
   }
 
   Offset transformOffset(Offset point) {
-    Offset result = transformationController.value.trans *
+    Offset result = transformationController.toScene(point);
     return result;
   }
 

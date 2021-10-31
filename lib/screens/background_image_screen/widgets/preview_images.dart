@@ -19,6 +19,8 @@ class _PreviewImageState extends State<PreviewImage> {
   late PhotoViewScaleStateController scaleStateController;
   late PhotoViewController controller;
   Offset setOffset = Offset.zero;
+  final TransformationController imageTransformationController =
+      TransformationController();
 
   @override
   void initState() {
@@ -30,10 +32,8 @@ class _PreviewImageState extends State<PreviewImage> {
   void listener(PhotoViewControllerValue value) {
     print(value);
     Offset imagePoint = value.position;
-    Offset offset =
-        context.read<AnimationControllerProvider>().transformOffset(imagePoint);
-    print('offset $offset');
-    setOffset = offset;
+
+    // setOffset = offset;
   }
 
   @override
@@ -50,6 +50,18 @@ class _PreviewImageState extends State<PreviewImage> {
         ' scale: ${context.read<AnimationControllerProvider>().transformationController.value.getMaxScaleOnAxis()}');
     print(
         'transform: ${context.read<AnimationControllerProvider>().transformationController.value}');
+  }
+
+  void updateImageController(ScaleUpdateDetails details) {
+    print('update controller image ${imageTransformationController.value}');
+    print('details $details');
+    final imagePoint = imageTransformationController.value.getTranslation();
+    Offset offset = context
+        .read<AnimationControllerProvider>()
+        .transformOffset(Offset(imagePoint[0], imagePoint[1]));
+    print('offset $offset');
+    setOffset = offset;
+    setState(() {});
   }
 
   @override
@@ -91,9 +103,9 @@ class _PreviewImageState extends State<PreviewImage> {
                           scaleStateController: scaleStateController,
                           enablePanAlways: true,
                           initialScale: 1.0,
-                          // controller: controller
-                          //   ..scale = 1
-                          //   ..position = Offset.zero,
+                          controller: controller
+                            ..scale = 1
+                            ..position = setOffset,
                         ),
                       Opacity(
                         opacity: 0.5,
@@ -101,7 +113,7 @@ class _PreviewImageState extends State<PreviewImage> {
                           child: CustomPaint(
                             child: Container(),
                             painter: MapCanvas(
-                              topLeft: Offset(-225.3, 228.6),
+                              topLeft: setOffset,
                               bottomRight: Offset(876.2, 816.5),
                             ),
                           ),
@@ -115,19 +127,30 @@ class _PreviewImageState extends State<PreviewImage> {
                 if (image.path.isNotEmpty &&
                     context.watch<AnimationControllerProvider>().isSaved)
                   Opacity(
-                    opacity: 0.5,
-                    child: ClipRect(
-                      child: PhotoView(
-                        key: ValueKey(image.path),
-                        imageProvider: FileImage(File(image.path)),
-                        scaleStateController: scaleStateController,
-                        enablePanAlways: true,
-                        controller: controller
-                          // ..position = Offset(876.2, 816.5)
-                          ..scale = 1,
-                      ),
+                    opacity: 0.8,
+                    child: InteractiveViewer(
+                      transformationController: imageTransformationController,
+                      boundaryMargin: const EdgeInsets.all(5000),
+                      onInteractionUpdate: updateImageController,
+                      minScale: 0.1,
+                      maxScale: 5,
+                      child: Image.file(File(image.path)),
                     ),
-                  ),
+                  )
+              // Opacity(
+              //   opacity: 0.5,
+              //   child: ClipRect(
+              //     child: PhotoView(
+              //       key: ValueKey(image.path),
+              //       imageProvider: FileImage(File(image.path)),
+              //       scaleStateController: scaleStateController,
+              //       enablePanAlways: true,
+              //       controller: controller
+              //         // ..position = Offset(876.2, 816.5)
+              //         ..scale = 1,
+              //     ),
+              //   ),
+              // ),
             ],
           );
           // return Container(
