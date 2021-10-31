@@ -18,7 +18,8 @@ class _PreviewImageState extends State<PreviewImage> {
   final GlobalKey _targetKey = GlobalKey();
   late PhotoViewScaleStateController scaleStateController;
   late PhotoViewController controller;
-  Offset setOffset = Offset.zero;
+  Offset setOffset = Offset(5.9,-79.4);
+  double scale =(1/0.4789*0.58111);
   final TransformationController imageTransformationController =
       TransformationController();
 
@@ -102,9 +103,9 @@ class _PreviewImageState extends State<PreviewImage> {
                           basePosition: Alignment.topLeft,
                           scaleStateController: scaleStateController,
                           enablePanAlways: true,
-                          initialScale: 1.0,
+                          initialScale: scale,
                           controller: controller
-                            ..scale = 1
+                            // ..scale = scale
                             ..position = setOffset,
                         ),
                       Opacity(
@@ -130,7 +131,7 @@ class _PreviewImageState extends State<PreviewImage> {
                     opacity: 0.8,
                     child: InteractiveViewer(
                       transformationController: imageTransformationController,
-                      boundaryMargin: const EdgeInsets.all(5000),
+                      boundaryMargin: const EdgeInsets.all(1000),
                       onInteractionUpdate: updateImageController,
                       minScale: 0.1,
                       maxScale: 5,
