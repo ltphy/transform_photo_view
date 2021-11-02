@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view_picker/provider/animation_controller_provider.dart';
@@ -18,8 +19,11 @@ class _PreviewImageState extends State<PreviewImage> {
   final GlobalKey _targetKey = GlobalKey();
   late PhotoViewScaleStateController scaleStateController;
   late PhotoViewController controller;
-  Offset setOffset = Offset(5.9,-79.4);
-  double scale =(1/0.4789*0.58111);
+  Offset setOffset = Offset.zero;
+  Offset setOffset2 = Offset.zero;
+
+  // double scale = (1 / 0.4789 * 0.58111);
+  double scale = 1;
   final TransformationController imageTransformationController =
       TransformationController();
 
@@ -57,11 +61,23 @@ class _PreviewImageState extends State<PreviewImage> {
     print('update controller image ${imageTransformationController.value}');
     print('details $details');
     final imagePoint = imageTransformationController.value.getTranslation();
+    final maxScale = imageTransformationController.value.getMaxScaleOnAxis();
     Offset offset = context
         .read<AnimationControllerProvider>()
         .transformOffset(Offset(imagePoint[0], imagePoint[1]));
+    print('media width: ${MediaQuery.of(context).size.width}');
+    print('width ${WidgetsBinding.instance?.window.physicalSize.height}');
+    Offset topRight = Offset(400 * maxScale, 0);
+    Offset topRightConverted = topRight.translate(imagePoint[0], imagePoint[1]);
+    print('topRightCOnverted: $topRightConverted');
+    Offset offset2 = context
+        .read<AnimationControllerProvider>()
+        .transformOffset(topRightConverted);
     print('offset $offset');
+
+    print('offset ${offset2}');
     setOffset = offset;
+    setOffset2 = offset2;
     setState(() {});
   }
 
@@ -78,49 +94,52 @@ class _PreviewImageState extends State<PreviewImage> {
         if (image != null) {
           return Stack(
             children: [
-              ClipRect(
-                child: InteractiveViewer(
-                  key: _targetKey,
-                  onInteractionUpdate: updateController,
-                  transformationController: context
-                      .read<AnimationControllerProvider>()
-                      .transformationController,
-                  scaleEnabled:
-                      !context.watch<AnimationControllerProvider>().isSaved ||
-                          context.watch<AnimationControllerProvider>().isDone,
-                  panEnabled:
-                      !context.watch<AnimationControllerProvider>().isSaved ||
-                          context.watch<AnimationControllerProvider>().isDone,
-                  minScale: 0.1,
-                  maxScale: 5,
-                  boundaryMargin: const EdgeInsets.all(5000),
-                  child: Stack(
-                    children: [
-                      if (context.watch<AnimationControllerProvider>().isDone)
-                        PhotoView(
-                          key: UniqueKey(),
-                          imageProvider: FileImage(File(image.path)),
-                          basePosition: Alignment.topLeft,
-                          scaleStateController: scaleStateController,
-                          enablePanAlways: true,
-                          initialScale: scale,
-                          controller: controller
-                            // ..scale = scale
-                            ..position = setOffset,
-                        ),
-                      Opacity(
-                        opacity: 0.5,
-                        child: RepaintBoundary(
-                          child: CustomPaint(
-                            child: Container(),
-                            painter: MapCanvas(
-                              topLeft: setOffset,
-                              bottomRight: Offset(876.2, 816.5),
+              Container(
+                color: Colors.black,
+                child: ClipRect(
+                  child: InteractiveViewer(
+                    key: _targetKey,
+                    onInteractionUpdate: updateController,
+                    transformationController: context
+                        .read<AnimationControllerProvider>()
+                        .transformationController,
+                    scaleEnabled:
+                        !context.watch<AnimationControllerProvider>().isSaved ||
+                            context.watch<AnimationControllerProvider>().isDone,
+                    panEnabled:
+                        !context.watch<AnimationControllerProvider>().isSaved ||
+                            context.watch<AnimationControllerProvider>().isDone,
+                    minScale: 0.1,
+                    maxScale: 5,
+                    boundaryMargin: const EdgeInsets.all(5000),
+                    child: Stack(
+                      children: [
+                        if (context.watch<AnimationControllerProvider>().isDone)
+                          PhotoView(
+                            key: UniqueKey(),
+                            imageProvider: FileImage(File(image.path)),
+                            basePosition: Alignment.topLeft,
+                            scaleStateController: scaleStateController,
+                            enablePanAlways: true,
+                            initialScale: scale,
+                            controller: controller
+                              // ..scale = scale
+                              ..position = setOffset,
+                          ),
+                        Opacity(
+                          opacity: 0.5,
+                          child: RepaintBoundary(
+                            child: CustomPaint(
+                              child: Container(),
+                              painter: MapCanvas(
+                                topLeft: setOffset,
+                                bottomRight: setOffset2,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -129,13 +148,19 @@ class _PreviewImageState extends State<PreviewImage> {
                     context.watch<AnimationControllerProvider>().isSaved)
                   Opacity(
                     opacity: 0.8,
-                    child: InteractiveViewer(
-                      transformationController: imageTransformationController,
-                      boundaryMargin: const EdgeInsets.all(1000),
-                      onInteractionUpdate: updateImageController,
-                      minScale: 0.1,
-                      maxScale: 5,
-                      child: Image.file(File(image.path)),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height,
+                      child: ClipRect(
+                        child: InteractiveViewer(
+                          transformationController:
+                              imageTransformationController,
+                          boundaryMargin: const EdgeInsets.all(10000),
+                          onInteractionUpdate: updateImageController,
+                          minScale: 0.1,
+                          maxScale: 5,
+                          child: Image.file(File(image.path)),
+                        ),
+                      ),
                     ),
                   )
               // Opacity(

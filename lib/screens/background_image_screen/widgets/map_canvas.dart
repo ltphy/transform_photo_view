@@ -26,7 +26,7 @@ class MapCanvas extends CustomPainter {
     canvas.drawRect(Rect.fromLTRB(0, 0, 500, 500), mapPaint);
 
     canvas.drawCircle(topLeft, 20, mapPaint);
-    canvas.drawCircle(bottomRight, 3, pointPaint);
+    canvas.drawCircle(bottomRight, 20, mapPaint);
     canvas.drawCircle(Offset.zero, 2, pointPaint);
     canvas.drawCircle(Offset(163.1, 390.0), 5, pointPaint);
     canvas.drawCircle(Offset(-200.8, -279.0), 5, pointPaint);
