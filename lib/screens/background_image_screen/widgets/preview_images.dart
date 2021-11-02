@@ -121,7 +121,7 @@ class _PreviewImageState extends State<PreviewImage> {
                             basePosition: Alignment.topLeft,
                             scaleStateController: scaleStateController,
                             enablePanAlways: true,
-                            initialScale: scale,
+                            initialScale: (setOffset2.dx - setOffset.dx) / 500,
                             controller: controller
                               // ..scale = scale
                               ..position = setOffset,
