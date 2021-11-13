@@ -19,7 +19,10 @@ class BackgroundImageScreen extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (BuildContext context) {
-            return AnimationControllerProvider();
+            return AnimationControllerProvider(
+              pickImageProvider:
+                  Provider.of<PickImageProvider>(context, listen: false),
+            );
           },
         )
       ],
